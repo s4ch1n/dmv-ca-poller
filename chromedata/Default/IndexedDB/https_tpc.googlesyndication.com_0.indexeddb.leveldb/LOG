@@ -1,0 +1,3 @@
+2019/03/20-16:52:31.441 ed13 Reusing MANIFEST /Users/george.zhai/go/src/github.com/GeorgeZhai/dmv-ca-poller/chromedata/Default/IndexedDB/https_tpc.googlesyndication.com_0.indexeddb.leveldb/MANIFEST-000001
+2019/03/20-16:52:31.441 ed13 Recovering log #3
+2019/03/20-16:52:31.441 ed13 Reusing old log /Users/george.zhai/go/src/github.com/GeorgeZhai/dmv-ca-poller/chromedata/Default/IndexedDB/https_tpc.googlesyndication.com_0.indexeddb.leveldb/000003.log 
