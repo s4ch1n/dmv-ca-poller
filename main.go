@@ -21,17 +21,53 @@ type DefaultConf struct {
 	GRecaptchaResponse string
 }
 
+type UserSettings struct {
+	homeloclat       float64 `json:"homeloclat"`
+	homeloclng       float64 `json:"homeloclng"`
+	mode             string  `json:"mode"`
+	numberItems      string  `json:"numberItems"`
+	taskCID          string  `json:"taskCID"`
+	firstName        string  `json:"firstName"`
+	lastName         string  `json:"lastName"`
+	telArea          string  `json:"telArea"`
+	telPrefix        string  `json:"telPrefix"`
+	telSuffix        string  `json:"telSuffix"`
+	resetCheckFields string  `json:"resetCheckFields"`
+}
+
+type DMVInfo struct {
+	name string  `json:"name"`
+	id   int     `json:"id"`
+	lat  float64 `json:"lat"`
+	lng  float64 `json:"lng"`
+}
+
 var dc = DefaultConf{}
 
-type DMVInfo struct{}
+// var us = UserSettings{}
+
+type jsondata interface{}
+
+var us map[string]string
 
 var dmv = DMVInfo{}
 
-func loadDefaultConf(dc *DefaultConf) {
+func loadDefaultConf(d *DefaultConf) {
 	f, _ := os.Open("defaultconf.json")
 	defer f.Close()
 	decoder := json.NewDecoder(f)
-	err := decoder.Decode(dc)
+	err := decoder.Decode(d)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+}
+
+func loadUserSettings(d *jsondata) {
+	bs, err := ioutil.ReadFile("usersettings.json")
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	err = json.Unmarshal(bs, &d)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
@@ -123,8 +159,11 @@ func getAppointmentTime(s string) (time.Time, error) {
 func main() {
 
 	loadDefaultConf(&dc)
-	loadDMVLoc(&dmv)
-	fmt.Println(dmv)
+	loadUserSettings(&us)
+	// loadDMVLoc(&dmv)
+	fmt.Println(dc)
+	fmt.Println(us)
+	fmt.Println(us["homeloclat"])
 
 	// res, err := requestDMV()
 	// if err != nil {
