@@ -1,1046 +1,872 @@
-[
-    {
-        "name": "ALTURAS",
+{
+    "ALTURAS": {
         "id": 537,
         "lat": 41.4871146,
         "lng": -120.5424555
     },
-    {
-        "name": "ARLETA",
+    "ARLETA": {
         "id": 587,
         "lat": 34.2504595,
         "lng": -118.4338345
     },
-    {
-        "name": "ARVIN",
+    "ARVIN": {
         "id": 661,
         "lat": 35.2017986,
         "lng": -118.833105
     },
-    {
-        "name": "AUBURN",
+    "AUBURN": {
         "id": 570,
         "lat": 38.8965654,
         "lng": -121.0768901
     },
-    {
-        "name": "BAKERSFIELD",
+    "BAKERSFIELD": {
         "id": 529,
         "lat": 35.3732921,
         "lng": -119.0187125
     },
-    {
-        "name": "BAKERSFIELD SW",
+    "BAKERSFIELD SW": {
         "id": 679,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "BANNING",
+    "BANNING": {
         "id": 641,
         "lat": 33.9255713,
         "lng": -116.8764103
     },
-    {
-        "name": "BARSTOW",
+    "BARSTOW": {
         "id": 582,
         "lat": 34.8957957,
         "lng": -117.0172826
     },
-    {
-        "name": "BELL GARDENS",
+    "BELL GARDENS": {
         "id": 576,
         "lat": 33.9652918,
         "lng": -118.1514588
     },
-    {
-        "name": "BELLFLOWER",
+    "BELLFLOWER": {
         "id": 606,
         "lat": 33.8816818,
         "lng": -118.1170117
     },
-    {
-        "name": "BISHOP",
+    "BISHOP": {
         "id": 585,
         "lat": 37.3614238,
         "lng": -118.3996636
     },
-    {
-        "name": "BLYTHE",
+    "BLYTHE": {
         "id": 528,
         "lat": 33.6177725,
         "lng": -114.5882607
     },
-    {
-        "name": "BRAWLEY",
+    "BRAWLEY": {
         "id": 597,
         "lat": 32.9786566,
         "lng": -115.530267
     },
-    {
-        "name": "CAPITOLA",
+    "CAPITOLA": {
         "id": 550,
         "lat": 36.9752283,
         "lng": -121.953293
     },
-    {
-        "name": "CARMICHAEL",
+    "CARMICHAEL": {
         "id": 625,
         "lat": 38.617127,
         "lng": -121.3282843
     },
-    {
-        "name": "CHICO",
+    "CHICO": {
         "id": 520,
         "lat": 39.7284944,
         "lng": -121.8374777
     },
-    {
-        "name": "CHULA VISTA",
+    "CHULA VISTA": {
         "id": 613,
         "lat": 32.6400541,
         "lng": -117.0841955
     },
-    {
-        "name": "CLOVIS",
+    "CLOVIS": {
         "id": 580,
         "lat": 36.8252277,
         "lng": -119.7029194
     },
-    {
-        "name": "COALINGA",
+    "COALINGA": {
         "id": 603,
         "lat": 36.139678,
         "lng": -120.3601496
     },
-    {
-        "name": "COLUSA",
+    "COLUSA": {
         "id": 564,
         "lat": 39.2143343,
         "lng": -122.0094175
     },
-    {
-        "name": "COMPTON",
+    "COMPTON": {
         "id": 581,
         "lat": 33.8958492,
         "lng": -118.2200712
     },
-    {
-        "name": "CONCORD",
+    "CONCORD": {
         "id": 523,
         "lat": 37.9779776,
         "lng": -122.0310733
     },
-    {
-        "name": "CORTE MADERA",
+    "CORTE MADERA": {
         "id": 534,
         "lat": 37.9254806,
         "lng": -122.5274755
     },
-    {
-        "name": "COSTA MESA",
+    "COSTA MESA": {
         "id": 628,
         "lat": 33.6411316,
         "lng": -117.9186689
     },
-    {
-        "name": "CRESCENT CITY",
+    "CRESCENT CITY": {
         "id": 524,
         "lat": 30.28783,
         "lng": 120.194008
     },
-    {
-        "name": "CULVER CITY",
+    "CULVER CITY": {
         "id": 514,
         "lat": 34.0211224,
         "lng": -118.3964665
     },
-    {
-        "name": "DALY CITY",
+    "DALY CITY": {
         "id": 599,
         "lat": 37.6879241,
         "lng": -122.4702079
     },
-    {
-        "name": "DAVIS",
+    "DAVIS": {
         "id": 598,
         "lat": 38.5449065,
         "lng": -121.7405167
     },
-    {
-        "name": "DELANO",
+    "DELANO": {
         "id": 615,
         "lat": 35.7688425,
         "lng": -119.2470536
     },
-    {
-        "name": "EL CAJON",
+    "EL CAJON": {
         "id": 669,
         "lat": 32.7947731,
         "lng": -116.9625269
     },
-    {
-        "name": "EL CENTRO",
+    "EL CENTRO": {
         "id": 527,
         "lat": 32.792,
         "lng": -115.5630514
     },
-    {
-        "name": "EL CERRITO",
+    "EL CERRITO": {
         "id": 556,
         "lat": 37.9161326,
         "lng": -122.310765
     },
-    {
-        "name": "EL MONTE",
+    "EL MONTE": {
         "id": 685,
         "lat": 34.0798132,
         "lng": -118.0457971
     },
-    {
-        "name": "EUREKA",
+    "EUREKA": {
         "id": 526,
         "lat": 40.8020712,
         "lng": -124.1636729
     },
-    {
-        "name": "FAIRFIELD",
+    "FAIRFIELD": {
         "id": 621,
         "lat": 38.24935809999999,
         "lng": -122.0399663
     },
-    {
-        "name": "FALL RIVER MILLS",
+    "FALL RIVER MILLS": {
         "id": 643,
         "lat": 41.0046076,
         "lng": -121.4383139
     },
-    {
-        "name": "FOLSOM",
+    "FOLSOM": {
         "id": 655,
         "lat": 38.6779591,
         "lng": -121.1760583
     },
-    {
-        "name": "FONTANA",
+    "FONTANA": {
         "id": 657,
         "lat": 34.0922335,
         "lng": -117.435048
     },
-    {
-        "name": "FORT BRAGG",
+    "FORT BRAGG": {
         "id": 590,
         "lat": 39.445723,
         "lng": -123.8052935
     },
-    {
-        "name": "FREMONT",
+    "FREMONT": {
         "id": 644,
         "lat": 37.5482697,
         "lng": -121.9885719
     },
-    {
-        "name": "FRESNO",
+    "FRESNO": {
         "id": 505,
         "lat": 36.7468422,
         "lng": -119.7725868
     },
-    {
-        "name": "FRESNO NORTH",
+    "FRESNO NORTH": {
         "id": 646,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "FULLERTON",
+    "FULLERTON": {
         "id": 607,
         "lat": 33.8703596,
         "lng": -117.9242966
     },
-    {
-        "name": "GARBERVILLE",
+    "GARBERVILLE": {
         "id": 627,
         "lat": 40.09997449999999,
         "lng": -123.7938108
     },
-    {
-        "name": "GILROY",
+    "GILROY": {
         "id": 623,
         "lat": 37.0057816,
         "lng": -121.5682751
     },
-    {
-        "name": "GLENDALE",
+    "GLENDALE": {
         "id": 510,
         "lat": 34.1425078,
         "lng": -118.255075
     },
-    {
-        "name": "GOLETA",
+    "GOLETA": {
         "id": 670,
         "lat": 34.4358294,
         "lng": -119.8276389
     },
-    {
-        "name": "GRASS VALLEY",
+    "GRASS VALLEY": {
         "id": 541,
         "lat": 39.2190608,
         "lng": -121.0610606
     },
-    {
-        "name": "HANFORD",
+    "HANFORD": {
         "id": 565,
         "lat": 36.3274502,
         "lng": -119.6456844
     },
-    {
-        "name": "HAWTHORNE",
+    "HAWTHORNE": {
         "id": 609,
         "lat": 33.9164032,
         "lng": -118.3525748
     },
-    {
-        "name": "HAYWARD",
+    "HAYWARD": {
         "id": 579,
         "lat": 37.6591881,
         "lng": -122.0871176
     },
-    {
-        "name": "HEMET",
+    "HEMET": {
         "id": 635,
         "lat": 33.7475203,
         "lng": -116.9719684
     },
-    {
-        "name": "HOLLISTER",
+    "HOLLISTER": {
         "id": 546,
         "lat": 36.8524545,
         "lng": -121.4016021
     },
-    {
-        "name": "HOLLYWOOD",
+    "HOLLYWOOD": {
         "id": 508,
         "lat": 34.0928092,
         "lng": -118.3286614
     },
-    {
-        "name": "HOLLYWOOD WEST",
+    "HOLLYWOOD WEST": {
         "id": 652,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "INDIO",
+    "INDIO": {
         "id": 578,
         "lat": 33.7205771,
         "lng": -116.2155619
     },
-    {
-        "name": "INGLEWOOD",
+    "INGLEWOOD": {
         "id": 610,
         "lat": 33.9616801,
         "lng": -118.3531311
     },
-    {
-        "name": "JACKSON",
+    "JACKSON": {
         "id": 521,
         "lat": 38.3488023,
         "lng": -120.7741018
     },
-    {
-        "name": "KING CITY",
+    "KING CITY": {
         "id": 647,
         "lat": 36.2127439,
         "lng": -121.1260287
     },
-    {
-        "name": "LAGUNA HILLS",
+    "LAGUNA HILLS": {
         "id": 605,
         "lat": 33.590277,
         "lng": -117.6962824
     },
-    {
-        "name": "LAKE ISABELLA",
+    "LAKE ISABELLA": {
         "id": 687,
         "lat": 35.6180087,
         "lng": -118.473141
     },
-    {
-        "name": "LAKEPORT",
+    "LAKEPORT": {
         "id": 530,
         "lat": 39.0429506,
         "lng": -122.9158293
     },
-    {
-        "name": "LANCASTER",
+    "LANCASTER": {
         "id": 595,
         "lat": 34.6867846,
         "lng": -118.1541632
     },
-    {
-        "name": "LINCOLN PARK",
+    "LINCOLN PARK": {
         "id": 617,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "LODI",
+    "LODI": {
         "id": 622,
         "lat": 38.1341477,
         "lng": -121.2722194
     },
-    {
-        "name": "LOMPOC",
+    "LOMPOC": {
         "id": 589,
         "lat": 34.6391501,
         "lng": -120.4579409
     },
-    {
-        "name": "LOMPOC DLPC",
+    "LOMPOC DLPC": {
         "id": 692,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "LONG BEACH",
+    "LONG BEACH": {
         "id": 507,
         "lat": 33.7700504,
         "lng": -118.1937395
     },
-    {
-        "name": "LOS ANGELES",
+    "LOS ANGELES": {
         "id": 502,
         "lat": 33.7583263,
         "lng": -118.2931362
     },
-    {
-        "name": "LOS ANGELES DLPC",
+    "LOS ANGELES DLPC": {
         "id": 693,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "LOS BANOS",
+    "LOS BANOS": {
         "id": 650,
         "lat": 37.0582786,
         "lng": -120.8499151
     },
-    {
-        "name": "LOS GATOS",
+    "LOS GATOS": {
         "id": 640,
         "lat": 37.2358078,
         "lng": -121.9623751
     },
-    {
-        "name": "MADERA",
+    "MADERA": {
         "id": 533,
         "lat": 36.9613356,
         "lng": -120.0607176
     },
-    {
-        "name": "MANTECA",
+    "MANTECA": {
         "id": 658,
         "lat": 37.7974273,
         "lng": -121.2160526
     },
-    {
-        "name": "MARIPOSA",
+    "MARIPOSA": {
         "id": 566,
         "lat": 37.4849377,
         "lng": -119.9662843
     },
-    {
-        "name": "MERCED",
+    "MERCED": {
         "id": 536,
         "lat": 37.3021632,
         "lng": -120.4829677
     },
-    {
-        "name": "MODESTO",
+    "MODESTO": {
         "id": 557,
         "lat": 37.63909719999999,
         "lng": -120.9968782
     },
-    {
-        "name": "MONTEBELLO",
+    "MONTEBELLO": {
         "id": 511,
         "lat": 34.0165053,
         "lng": -118.1137535
     },
-    {
-        "name": "MOUNT SHASTA",
+    "MOUNT SHASTA": {
         "id": 639,
         "lat": 41.3098746,
         "lng": -122.3105666
     },
-    {
-        "name": "NAPA",
+    "NAPA": {
         "id": 540,
         "lat": 38.2975381,
         "lng": -122.286865
     },
-    {
-        "name": "NEEDLES",
+    "NEEDLES": {
         "id": 584,
         "lat": 34.8480597,
         "lng": -114.6141315
     },
-    {
-        "name": "NEWHALL",
+    "NEWHALL": {
         "id": 662,
         "lat": 34.3847198,
         "lng": -118.5308652
     },
-    {
-        "name": "NORCO",
+    "NORCO": {
         "id": 586,
         "lat": 33.9311257,
         "lng": -117.548661
     },
-    {
-        "name": "NOVATO",
+    "NOVATO": {
         "id": 686,
         "lat": 38.1074198,
         "lng": -122.5697032
     },
-    {
-        "name": "OAKLAND CLAREMONT",
+    "OAKLAND CLAREMONT": {
         "id": 504,
         "lat": 37.8556246,
         "lng": -122.2441182
     },
-    {
-        "name": "OAKLAND COLISEUM",
+    "OAKLAND COLISEUM": {
         "id": 604,
         "lat": 37.7567466,
         "lng": -122.1930517
     },
-    {
-        "name": "OCEANSIDE",
+    "OCEANSIDE": {
         "id": 596,
         "lat": 33.1958696,
         "lng": -117.3794834
     },
-    {
-        "name": "OROVILLE",
+    "OROVILLE": {
         "id": 522,
         "lat": 39.5137752,
         "lng": -121.556359
     },
-    {
-        "name": "OXNARD",
+    "OXNARD": {
         "id": 636,
         "lat": 34.1975048,
         "lng": -119.1770516
     },
-    {
-        "name": "PALM DESERT",
+    "PALM DESERT": {
         "id": 683,
         "lat": 33.7222445,
         "lng": -116.3744556
     },
-    {
-        "name": "PALM SPRINGS",
+    "PALM SPRINGS": {
         "id": 659,
         "lat": 33.8302961,
         "lng": -116.5452921
     },
-    {
-        "name": "PALMDALE",
+    "PALMDALE": {
         "id": 690,
         "lat": 34.5794343,
         "lng": -118.1164613
     },
-    {
-        "name": "PARADISE",
+    "PARADISE": {
         "id": 601,
         "lat": 39.7596061,
         "lng": -121.6219177
     },
-    {
-        "name": "PASADENA",
+    "PASADENA": {
         "id": 509,
         "lat": 34.1477849,
         "lng": -118.1445155
     },
-    {
-        "name": "PASO ROBLES",
+    "PASO ROBLES": {
         "id": 574,
         "lat": 35.6368759,
         "lng": -120.6545022
     },
-    {
-        "name": "PETALUMA",
+    "PETALUMA": {
         "id": 634,
         "lat": 38.232417,
         "lng": -122.6366524
     },
-    {
-        "name": "PITTSBURG",
+    "PITTSBURG": {
         "id": 592,
         "lat": 38.0279762,
         "lng": -121.8846806
     },
-    {
-        "name": "PLACERVILLE",
+    "PLACERVILLE": {
         "id": 525,
         "lat": 38.7296252,
         "lng": -120.798546
     },
-    {
-        "name": "PLEASANTON",
+    "PLEASANTON": {
         "id": 631,
         "lat": 37.6624312,
         "lng": -121.8746789
     },
-    {
-        "name": "POMONA",
+    "POMONA": {
         "id": 532,
         "lat": 34.055103,
         "lng": -117.7499909
     },
-    {
-        "name": "PORTERVILLE",
+    "PORTERVILLE": {
         "id": 573,
         "lat": 36.06523,
         "lng": -119.0167679
     },
-    {
-        "name": "POWAY",
+    "POWAY": {
         "id": 676,
         "lat": 32.9628232,
         "lng": -117.0358646
     },
-    {
-        "name": "QUINCY",
+    "QUINCY": {
         "id": 544,
         "lat": 39.9368363,
         "lng": -120.9471764
     },
-    {
-        "name": "RANCHO CUCAMONGA",
+    "RANCHO CUCAMONGA": {
         "id": 612,
         "lat": 34.10639889999999,
         "lng": -117.5931084
     },
-    {
-        "name": "RED BLUFF",
+    "RED BLUFF": {
         "id": 558,
         "lat": 40.1784886,
         "lng": -122.2358302
     },
-    {
-        "name": "REDDING",
+    "REDDING": {
         "id": 551,
         "lat": 40.5865396,
         "lng": -122.3916754
     },
-    {
-        "name": "REDLANDS",
+    "REDLANDS": {
         "id": 626,
         "lat": 34.0555693,
         "lng": -117.1825381
     },
-    {
-        "name": "REDWOOD CITY",
+    "REDWOOD CITY": {
         "id": 548,
         "lat": 37.48521520000001,
         "lng": -122.2363548
     },
-    {
-        "name": "REEDLEY",
+    "REEDLEY": {
         "id": 633,
         "lat": 36.5963395,
         "lng": -119.4504029
     },
-    {
-        "name": "RIDGECREST",
+    "RIDGECREST": {
         "id": 577,
         "lat": 35.6224561,
         "lng": -117.6708966
     },
-    {
-        "name": "RIVERSIDE",
+    "RIVERSIDE": {
         "id": 545,
         "lat": 33.9533487,
         "lng": -117.3961564
     },
-    {
-        "name": "RIVERSIDE EAST",
+    "RIVERSIDE EAST": {
         "id": 656,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "ROCKLIN",
+    "ROCKLIN": {
         "id": 673,
         "lat": 38.7907339,
         "lng": -121.2357828
     },
-    {
-        "name": "ROSEVILLE",
+    "ROSEVILLE": {
         "id": 543,
         "lat": 38.7521235,
         "lng": -121.2880059
     },
-    {
-        "name": "SACRAMENTO",
+    "SACRAMENTO": {
         "id": 501,
         "lat": 38.5815719,
         "lng": -121.4943996
     },
-    {
-        "name": "SACRAMENTO SOUTH",
+    "SACRAMENTO SOUTH": {
         "id": 602,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "SALINAS",
+    "SALINAS": {
         "id": 539,
         "lat": 36.6777372,
         "lng": -121.6555013
     },
-    {
-        "name": "SAN ANDREAS",
+    "SAN ANDREAS": {
         "id": 568,
         "lat": 38.1960298,
         "lng": -120.6804872
     },
-    {
-        "name": "SAN BERNARDINO",
+    "SAN BERNARDINO": {
         "id": 512,
         "lat": 34.1083449,
         "lng": -117.2897652
     },
-    {
-        "name": "SAN CLEMENTE",
+    "SAN CLEMENTE": {
         "id": 648,
         "lat": 33.4269728,
         "lng": -117.6119925
     },
-    {
-        "name": "SAN DIEGO",
+    "SAN DIEGO": {
         "id": 506,
         "lat": 32.715738,
         "lng": -117.1610838
     },
-    {
-        "name": "SAN DIEGO CLAIREMONT",
+    "SAN DIEGO CLAIREMONT": {
         "id": 519,
         "lat": 32.8239594,
         "lng": -117.1848787
     },
-    {
-        "name": "SAN FRANCISCO",
+    "SAN FRANCISCO": {
         "id": 503,
         "lat": 37.7749295,
         "lng": -122.4194155
     },
-    {
-        "name": "SAN JOSE",
+    "SAN JOSE": {
         "id": 516,
         "lat": 37.3382082,
         "lng": -121.8863286
     },
-    {
-        "name": "SAN JOSE DLPC",
+    "SAN JOSE DLPC": {
         "id": 645,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "SAN LUIS OBISPO",
+    "SAN LUIS OBISPO": {
         "id": 547,
         "lat": 35.2827524,
         "lng": -120.6596156
     },
-    {
-        "name": "SAN MARCOS",
+    "SAN MARCOS": {
         "id": 620,
         "lat": 33.1433723,
         "lng": -117.1661449
     },
-    {
-        "name": "SAN MATEO",
+    "SAN MATEO": {
         "id": 593,
         "lat": 37.5629917,
         "lng": -122.3255254
     },
-    {
-        "name": "SAN PEDRO",
+    "SAN PEDRO": {
         "id": 619,
         "lat": 33.7583263,
         "lng": -118.2931362
     },
-    {
-        "name": "SAN YSIDRO",
+    "SAN YSIDRO": {
         "id": 677,
         "lat": 32.555556,
         "lng": -117.0470434
     },
-    {
-        "name": "SANTA ANA",
+    "SANTA ANA": {
         "id": 542,
         "lat": 33.7455731,
         "lng": -117.8678338
     },
-    {
-        "name": "SANTA BARBARA",
+    "SANTA BARBARA": {
         "id": 549,
         "lat": 34.4130572,
         "lng": -119.7012871
     },
-    {
-        "name": "SANTA CLARA",
+    "SANTA CLARA": {
         "id": 632,
         "lat": 37.3541079,
         "lng": -121.9552356
     },
-    {
-        "name": "SANTA MARIA",
+    "SANTA MARIA": {
         "id": 563,
         "lat": 34.4130572,
         "lng": -119.7012871
     },
-    {
-        "name": "SANTA MONICA",
+    "SANTA MONICA": {
         "id": 616,
         "lat": 34.0194543,
         "lng": -118.4911912
     },
-    {
-        "name": "SANTA PAULA",
+    "SANTA PAULA": {
         "id": 630,
         "lat": 34.3541659,
         "lng": -119.0592705
     },
-    {
-        "name": "SANTA ROSA",
+    "SANTA ROSA": {
         "id": 555,
         "lat": 38.440429,
         "lng": -122.7140548
     },
-    {
-        "name": "SANTA TERESA",
+    "SANTA TERESA": {
         "id": 668,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "SEASIDE",
+    "SEASIDE": {
         "id": 567,
         "lat": 36.6149217,
         "lng": -121.822098
     },
-    {
-        "name": "SHAFTER",
+    "SHAFTER": {
         "id": 660,
         "lat": 35.5005139,
         "lng": -119.2717761
     },
-    {
-        "name": "SIMI VALLEY",
+    "SIMI VALLEY": {
         "id": 680,
         "lat": 34.2694474,
         "lng": -118.781482
     },
-    {
-        "name": "SONORA",
+    "SONORA": {
         "id": 569,
         "lat": 37.9829496,
         "lng": -120.3821724
     },
-    {
-        "name": "SOUTH LAKE TAHOE",
+    "SOUTH LAKE TAHOE": {
         "id": 538,
         "lat": 38.939926,
         "lng": -119.9771868
     },
-    {
-        "name": "STANTON DLPC",
+    "STANTON DLPC": {
         "id": 698,
         "lat": 36.778261,
         "lng": -119.4179324
     },
-    {
-        "name": "STOCKTON",
+    "STOCKTON": {
         "id": 517,
         "lat": 37.9577016,
         "lng": -121.2907796
     },
-    {
-        "name": "SUSANVILLE",
+    "SUSANVILLE": {
         "id": 531,
         "lat": 40.4162842,
         "lng": -120.6530063
     },
-    {
-        "name": "TAFT",
+    "TAFT": {
         "id": 575,
         "lat": 35.1424671,
         "lng": -119.4565078
     },
-    {
-        "name": "TEMECULA",
+    "TEMECULA": {
         "id": 672,
         "lat": 33.4936391,
         "lng": -117.1483648
     },
-    {
-        "name": "THOUSAND OAKS",
+    "THOUSAND OAKS": {
         "id": 663,
         "lat": 34.1705609,
         "lng": -118.8375937
     },
-    {
-        "name": "TORRANCE",
+    "TORRANCE": {
         "id": 608,
         "lat": 33.8358492,
         "lng": -118.3406288
     },
-    {
-        "name": "TRACY",
+    "TRACY": {
         "id": 642,
         "lat": 37.7396513,
         "lng": -121.4252227
     },
-    {
-        "name": "TRUCKEE",
+    "TRUCKEE": {
         "id": 513,
         "lat": 39.3252283,
         "lng": -120.2073992
     },
-    {
-        "name": "TULARE",
+    "TULARE": {
         "id": 594,
         "lat": 36.2077288,
         "lng": -119.3473379
     },
-    {
-        "name": "TULELAKE",
+    "TULELAKE": {
         "id": 553,
         "lat": 41.9559884,
         "lng": -121.4774916
     },
-    {
-        "name": "TURLOCK",
+    "TURLOCK": {
         "id": 649,
         "lat": 37.4946568,
         "lng": -120.8465941
     },
-    {
-        "name": "TWENTYNINE PALMS",
+    "TWENTYNINE PALMS": {
         "id": 638,
         "lat": 34.1355582,
         "lng": -116.0541689
     },
-    {
-        "name": "UKIAH",
+    "UKIAH": {
         "id": 535,
         "lat": 39.1501709,
         "lng": -123.2077831
     },
-    {
-        "name": "VACAVILLE",
+    "VACAVILLE": {
         "id": 588,
         "lat": 38.3565773,
         "lng": -121.9877444
     },
-    {
-        "name": "VALLEJO",
+    "VALLEJO": {
         "id": 554,
         "lat": 38.1040864,
         "lng": -122.2566367
     },
-    {
-        "name": "VAN NUYS",
+    "VAN NUYS": {
         "id": 515,
         "lat": 34.1898566,
         "lng": -118.451357
     },
-    {
-        "name": "VENTURA",
+    "VENTURA": {
         "id": 560,
         "lat": 34.274646,
         "lng": -119.2290316
     },
-    {
-        "name": "VICTORVILLE",
+    "VICTORVILLE": {
         "id": 629,
         "lat": 34.5362184,
         "lng": -117.2927641
     },
-    {
-        "name": "VISALIA",
+    "VISALIA": {
         "id": 559,
         "lat": 36.3302284,
         "lng": -119.2920585
     },
-    {
-        "name": "WALNUT CREEK",
+    "WALNUT CREEK": {
         "id": 624,
         "lat": 37.9100783,
         "lng": -122.0651819
     },
-    {
-        "name": "WATSONVILLE",
+    "WATSONVILLE": {
         "id": 583,
         "lat": 36.910231,
         "lng": -121.7568946
     },
-    {
-        "name": "WEAVERVILLE",
+    "WEAVERVILLE": {
         "id": 572,
         "lat": 40.7309778,
         "lng": -122.9419708
     },
-    {
-        "name": "WEST COVINA",
+    "WEST COVINA": {
         "id": 618,
         "lat": 34.0686208,
         "lng": -117.9389526
     },
-    {
-        "name": "WESTMINSTER",
+    "WESTMINSTER": {
         "id": 611,
         "lat": 33.7513419,
         "lng": -117.9939921
     },
-    {
-        "name": "WHITTIER",
+    "WHITTIER": {
         "id": 591,
         "lat": 33.9791793,
         "lng": -118.032844
     },
-    {
-        "name": "WILLOWS",
+    "WILLOWS": {
         "id": 571,
         "lat": 39.5243265,
         "lng": -122.1935931
     },
-    {
-        "name": "WINNETKA",
+    "WINNETKA": {
         "id": 637,
         "lat": 34.2048586,
         "lng": -118.5739621
     },
-    {
-        "name": "WOODLAND",
+    "WOODLAND": {
         "id": 561,
         "lat": 38.67851570000001,
         "lng": -121.7732971
     },
-    {
-        "name": "YREKA",
+    "YREKA": {
         "id": 552,
         "lat": 41.7354186,
         "lng": -122.6344708
     },
-    {
-        "name": "YUBA CITY",
+    "YUBA CITY": {
         "id": 562,
         "lat": 39.1404477,
         "lng": -121.6169108
     }
-]
+}
