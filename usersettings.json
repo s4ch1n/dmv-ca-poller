@@ -8,11 +8,19 @@
     "mode": "OfficeVisit",
     "numberItems": 1,
     "taskCID": "true",
+<<<<<<< HEAD
     "firstName": "first",
     "lastName": "last",
     "telArea": "408",
     "telPrefix": "123",
     "telSuffix": "4567",
+=======
+    "firstName": "John",
+    "lastName": "Whrite",
+    "telArea": "408",
+    "telPrefix": "335",
+    "telSuffix": "6677",
+>>>>>>> b32d0c01074ba6fac62cae6487ecb19d675c12d6
     "senderEmail" :"sender@outlook.com",
 	"senderPW" :"password",
 	"receiverEmail" : "receiver@hotmail.com",
