@@ -327,8 +327,10 @@ func main() {
 
 	for {
 		c++
-		fmt.Printf("Starting scan round %d from: %s", c, time.Now().Format("2006-01-02 15:04 PM MST"))
+		fmt.Printf("Starting scan round %d from: %s \n", c, time.Now().Format("2006-01-02 15:04 PM MST"))
 		querydmvs(dmvstoquery, us, dc)
+		fmt.Printf("Completed round %d from: %s \n", c, time.Now().Format("2006-01-02 15:04 PM MST"))
+
 		time.Sleep(time.Duration(20) * time.Minute)
 	}
 
