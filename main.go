@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	// "github.com/emersion/go-smtp"
 )
 
 type jsondata map[string]interface{}
@@ -328,7 +327,7 @@ func main() {
 
 	for {
 		c++
-		fmt.Println("start round %d from: ", c, time.Now().Format("2006-01-02 15:04 PM MST"))
+		fmt.Printf("Starting scan round %d from: %s", c, time.Now().Format("2006-01-02 15:04 PM MST"))
 		querydmvs(dmvstoquery, us, dc)
 		time.Sleep(time.Duration(20) * time.Minute)
 	}
