@@ -1,0 +1,21 @@
+{
+    "homelocation": {
+        "lat": 37.3785351,
+        "lng": -122.0887737
+    },
+    "distance": 50,
+    "notifyForApptInDays": 3,
+    "mode": "OfficeVisit",
+    "numberItems": 1,
+    "taskCID": "true",
+    "firstName": "John",
+    "lastName": "Whrite",
+    "telArea": "408",
+    "telPrefix": "335",
+    "telSuffix": "6677",
+    "senderEmail" :"sender@outlook.com",
+	"senderPW" :"password",
+	"receiverEmail" : "receiver@hotmail.com",
+	"smtpServerHost" : "smtp.live.com",
+	"smtpServerPort" : 587
+}

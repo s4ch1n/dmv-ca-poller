@@ -7,63 +7,235 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
+	"math"
+	"math/rand"
 	"net/http"
+	"net/smtp"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 )
 
-type DefaultConf struct {
-	URLPost            string
-	CaptchaResponse    string
-	GRecaptchaResponse string
+type jsondata map[string]interface{}
+
+// DMVinfo defines ID, coordinates and NAme
+type DMVinfo struct {
+	ID   int
+	Lat  float64
+	Lng  float64
+	Name string
 }
 
-var dc = DefaultConf{}
+// Loc defines coordinates
+type Loc struct {
+	Lat float64
+	Lng float64
+}
 
-type DMVInfo struct{}
+var us = jsondata{}
+var dc = jsondata{}
+var dmvs = jsondata{}
+var dmvinfolists = []DMVinfo{}
+var testhtml string
+var offlineDebugMode = bool(false)
+var queryErrorCountAllowed = int(20)
 
-var dmv = DMVInfo{}
+// outlook.com needs custermized stmp.Auth
+type loginAuth struct {
+	username, password string
+}
 
-func loadDefaultConf(dc *DefaultConf) {
-	f, _ := os.Open("defaultconf.json")
-	defer f.Close()
-	decoder := json.NewDecoder(f)
-	err := decoder.Decode(dc)
+// LoginAuth returns an Auth that implements the LOGIN authentication
+// mechanism as defined in RFC 4616.
+func LoginAuth(username, password string) smtp.Auth {
+	return &loginAuth{username, password}
+}
+
+func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
+	return "LOGIN", nil, nil
+}
+
+func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
+	command := string(fromServer)
+	command = strings.TrimSpace(command)
+	command = strings.TrimSuffix(command, ":")
+	command = strings.ToLower(command)
+
+	if more {
+		if command == "username" {
+			return []byte(fmt.Sprintf("%s", a.username)), nil
+		} else if command == "password" {
+			return []byte(fmt.Sprintf("%s", a.password)), nil
+		} else {
+			// We've already sent everything.
+			return nil, fmt.Errorf("unexpected server challenge: %s", command)
+		}
+	}
+	return nil, nil
+}
+
+func loadjsonfile(d *jsondata, f string) {
+	bs, err := ioutil.ReadFile(f)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	err = json.Unmarshal(bs, &d)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
 }
 
-func loadDMVLoc(dmv *DMVInfo) {
-	f, _ := os.Open("dmvInfo.json")
-	defer f.Close()
-	decoder := json.NewDecoder(f)
-	err := decoder.Decode(dmv)
+func loadtextfile(f string) (string, error) {
+	bs, err := ioutil.ReadFile(f)
 	if err != nil {
 		fmt.Println("error:", err)
+		return "", err
 	}
+	return string(bs), nil
 }
 
-func requestDMV() (string, error) {
+func distance(lat1 float64, lng1 float64, lat2 float64, lng2 float64, unit ...string) float64 {
+	const PI float64 = 3.141592653589793
+	radlat1 := float64(PI * lat1 / 180)
+	radlat2 := float64(PI * lat2 / 180)
+	theta := float64(lng1 - lng2)
+	radtheta := float64(PI * theta / 180)
+	dist := math.Sin(radlat1)*math.Sin(radlat2) + math.Cos(radlat1)*math.Cos(radlat2)*math.Cos(radtheta)
+	if dist > 1 {
+		dist = 1
+	}
 
-	body := strings.NewReader(`mode=OfficeVisit&captchaResponse=03AOLTBLR3efGSZ3wQ_Wtxsvu4TOyUpWNAtEzJ8BUWj450rgbx_M-277VsZKQWkQqZWH4lHTj_lGOckdsOTlZfwby63B_yPKUilY3IyC3zWDCZkUNYa8GvNiWAwlkTDrupNtDbN-aC88HmINrozTaKx1U-_rsB6A1B7ozohB_KeVJVod5YRbA8ElwRM79zINXoxgVKAYbumnez_IbbV1aXG5fm95uWwWz9JuP3LxfLmrobBC9K2A6GkcRywnhUZkZO5IGob_1D4CjtmLx37XBrt3JBH9ht5-oKLDR5crPXH2eahSwsO28WHodwF1z_qBs6kD4jRlgrpD0g&officeId=570&numberItems=1&taskCID=true&firstName=JASON&lastName=WHITE&telArea=408&telPrefix=122&telSuffix=4336&resetCheckFields=true&g-recaptcha-response=03AOLTBLR3efGSZ3wQ_Wtxsvu4TOyUpWNAtEzJ8BUWj450rgbx_M-277VsZKQWkQqZWH4lHTj_lGOckdsOTlZfwby63B_yPKUilY3IyC3zWDCZkUNYa8GvNiWAwlkTDrupNtDbN-aC88HmINrozTaKx1U-_rsB6A1B7ozohB_KeVJVod5YRbA8ElwRM79zINXoxgVKAYbumnez_IbbV1aXG5fm95uWwWz9JuP3LxfLmrobBC9K2A6GkcRywnhUZkZO5IGob_1D4CjtmLx37XBrt3JBH9ht5-oKLDR5crPXH2eahSwsO28WHodwF1z_qBs6kD4jRlgrpD0g`)
-	req, err := http.NewRequest("POST", "https://www.dmv.ca.gov/wasapp/foa/findOfficeVisit.do", body)
+	dist = math.Acos(dist)
+	dist = dist * 180 / PI
+	dist = dist * 60 * 1.1515
+
+	if len(unit) > 0 {
+		if unit[0] == "K" {
+			dist = dist * 1.609344
+		} else if unit[0] == "N" {
+			dist = dist * 0.8684
+		}
+	}
+
+	return dist
+}
+
+func findDMVsByDistance(dmvs []DMVinfo, l Loc, d float64) []DMVinfo {
+	r := []DMVinfo{}
+
+	for _, dmv := range dmvs {
+		dist := distance(dmv.Lat, dmv.Lng, l.Lat, l.Lng)
+		if dist <= d {
+			r = append(r, dmv)
+		}
+	}
+	return r
+}
+
+func notify(us jsondata, s string) {
+	fmt.Println(s)
+
+	senderEmail := us["senderEmail"].(string)
+	senderPW := us["senderPW"].(string)
+	receiverEmail := us["receiverEmail"].(string)
+	smtpServerHost := us["smtpServerHost"].(string)
+	smtpServerPort := int(us["smtpServerPort"].(float64))
+
+	fmt.Println("sending email to ", receiverEmail)
+
+	auth := LoginAuth(senderEmail, senderPW)
+
+	to := []string{receiverEmail}
+	msgs := fmt.Sprintf("To: %s\r\n"+
+		"Subject: DMV search notification\r\n"+
+		"\r\n"+
+		" %s \r\n", receiverEmail, s)
+	msg := []byte(msgs)
+	err := smtp.SendMail(smtpServerHost+":"+strconv.Itoa(smtpServerPort), auth, senderEmail, to, msg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func querydmvs(dmvs []DMVinfo, us jsondata, dc jsondata) {
+
+	rand.Seed(time.Now().UnixNano())
+	notifyForApptInDays := us["notifyForApptInDays"].(float64)
+
+	for _, dmv := range dmvs {
+		minPause := 5
+		n := rand.Intn(10)
+		fmt.Printf("working ... Query DMV %s (%d) in %d seconds, errorcount left %d , try to get appointment in %f days...", dmv.Name, dmv.ID, n+minPause, queryErrorCountAllowed, notifyForApptInDays)
+		time.Sleep(time.Duration(n+minPause) * time.Second)
+		res, err := requestDMV(dmv, us["mode"].(string), int(us["numberItems"].(float64)), us["taskCID"].(string), us["firstName"].(string), us["lastName"].(string), us["telArea"].(string), us["telPrefix"].(string), us["telSuffix"].(string), dc["URLPost"].(string), dc["CaptchaResponse"].(string), dc["GRecaptchaResponse"].(string))
+
+		if err != nil {
+			fmt.Println("error:", err)
+			queryErrorCountAllowed--
+			if queryErrorCountAllowed <= 0 {
+				fmt.Println("quit programm, too many errors...:")
+				os.Exit(1)
+			}
+			continue
+		}
+
+		t, err := getAppointmentTime(res)
+
+		if err != nil {
+			fmt.Println("error:", err)
+			queryErrorCountAllowed--
+			if queryErrorCountAllowed <= 0 {
+				fmt.Println("quit programm, too many errors...:")
+				os.Exit(1)
+			}
+			continue
+		}
+
+		delta := t.Sub(time.Now())
+		deltaDays := delta.Hours() / 24
+		fmt.Printf(" in  %f days \n", deltaDays)
+
+		if deltaDays <= notifyForApptInDays {
+			notification := fmt.Sprintf("Found DMV %s, ID: %d, Date: %s, in the next %f days", dmv.Name, dmv.ID, t.Format("2006-01-02 15:04 PM MST"), deltaDays)
+			notify(us, notification)
+		}
+
+	}
+
+}
+
+func requestDMV(dmvs DMVinfo, mode string, numberItems int, taskCID string, firstName string, lastName string, telArea string, telPrefix string, telSuffix string, url string, captchaResponse string, gRecaptchaResponse string) (string, error) {
+
+	referer := "https://www.dmv.ca.gov/wasapp/foa/findOfficeVisit.do"
+	origin := "https://www.dmv.ca.gov"
+
+	querydata := fmt.Sprintf("mode=%s&captchaResponse=%s&officeId=%d&numberItems=%d&taskCID=%s&firstName=%s&lastName=%s&telArea=%s&telPrefix=%s&telSuffix=%s&resetCheckFields=true&g-recaptcha-response=%s", mode, captchaResponse, dmvs.ID, numberItems, taskCID, firstName, lastName, telArea, telPrefix, telSuffix, gRecaptchaResponse)
+	body := strings.NewReader(querydata)
+	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Cache-Control", "max-age=0")
-	req.Header.Set("Origin", "https://www.dmv.ca.gov")
+	req.Header.Set("Origin", origin)
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-	req.Header.Set("Referer", "https://www.dmv.ca.gov/wasapp/foa/findOfficeVisit.do")
+	req.Header.Set("Referer", referer)
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6")
+
+	if offlineDebugMode {
+		testhtml, _ = loadtextfile("testhtml.html")
+		return testhtml, nil
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -71,13 +243,12 @@ func requestDMV() (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode == http.StatusOK {
 
-		// Check that the server actually sent compressed data
 		var reader io.ReadCloser
 		switch resp.Header.Get("Content-Encoding") {
 		case "gzip":
-			fmt.Println("gzipped data found:")
 			reader, err = gzip.NewReader(resp.Body)
 			defer reader.Close()
 		default:
@@ -100,904 +271,65 @@ func requestDMV() (string, error) {
 }
 
 func getAppointmentTime(s string) (time.Time, error) {
+	now := time.Now()
+	oneYearLater := now.Add(time.Hour * time.Duration(24*365))
 
-	// r, _ := regexp.Compile(".*, .* \\d{1,2}, \\d{4} at \\d{1,2}:\\d{2} (AM|PM)")
+	if strings.Contains(s, "Sorry, all appointments at this office are currently taken") || strings.Contains(s, "no appointment is available") {
+		return oneYearLater, nil
+	}
+
 	r, _ := regexp.Compile("(\\w+), (\\w+) (\\d{1,2}), (\\d{4}) at (\\d{1,2}:\\d{2}) (AM|PM)")
-
 	match := r.FindStringSubmatch(s)
 
 	if len(match) == 0 {
-		return time.Now(), errors.New("No datetime string found in return")
+
+		f, err := os.Create("notimestampe.html")
+		if err != nil {
+			fmt.Println(err)
+		}
+		l, err := f.WriteString(s)
+		fmt.Println(l)
+		if err != nil {
+			fmt.Println(err)
+			f.Close()
+		}
+		f.Close()
+		return oneYearLater, errors.New("No datetime string found in return")
+
 	}
-
-	fmt.Println(match[0])
-
-	t, err := time.Parse("Monday, Jan 2, 2006 at 15:04 PM -0700", match[0]+" -0700")
+	t, err := time.Parse("Monday, January 2, 2006 at 15:04 PM -0700", match[0]+" -0700")
 	if err != nil {
 		fmt.Println("error:", err)
-		return time.Now(), err
+		return oneYearLater, err
 	}
 
 	return t, nil
 }
 func main() {
 
-	loadDefaultConf(&dc)
-	loadDMVLoc(&dmv)
-	fmt.Println(dmv)
+	loadjsonfile(&dc, "defaultconf.json")
+	loadjsonfile(&us, "usersettings.json")
 
-	// res, err := requestDMV()
-	// if err != nil {
-	// 	fmt.Println("error:", err)
-	// 	os.Exit(1)
-	// }
+	loadjsonfile(&dmvs, "dmvinfo.json")
 
-	res := testhtml
-	// fmt.Println(res)
-
-	t, err := getAppointmentTime(res)
-
-	if err != nil {
-		fmt.Println("error:", err)
-		os.Exit(1)
+	for k, v := range dmvs {
+		dmv := DMVinfo{}
+		mapstructure.Decode(v, &dmv)
+		(&dmv).Name = k
+		dmvinfolists = append(dmvinfolists, dmv)
 	}
-	fmt.Println(t.Format("2006-01-02 15:04 PM MST"))
 
-	delta := t.Sub(time.Now())
-	fmt.Println(delta.Hours() / 24)
+	homeloc := Loc{}
+	mapstructure.Decode(us["homelocation"], &homeloc)
+
+	dmvstoquery := findDMVsByDistance(dmvinfolists, homeloc, us["distance"].(float64))
+	c := 0
+
+	for {
+		c++
+		fmt.Printf("Starting scan round %d from: %s", c, time.Now().Format("2006-01-02 15:04 PM MST"))
+		querydmvs(dmvstoquery, us, dc)
+		time.Sleep(time.Duration(20) * time.Minute)
+	}
 
 }
-
-const testhtml = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-
-
-
-
-
-
-
-<html lang="en">
-<head>
-<meta charset="windows-1252" />
-<meta http-equiv="Content-Type" content="text/html; windows-1252" />
-<meta http-equiv='Pragma' content='no-cache' />
-<meta http-equiv='Cache-Control' content='no-cache' />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-<meta name="HandheldFriendly" content="True" />
-<meta name="MobileOptimized" content="320" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
-
-<title>Appointment</title>
-
-<link rel="stylesheet" href="/wasapp/../imageserver/theme/css/colorscheme-oceanside.css" />
-<link rel="stylesheet" href="/wasapp/../imageserver/theme/css/cagov.core.css" />
-<link rel="stylesheet" href="/wasapp/../imageserver/theme/css/wasapp.css" />
-<script src="/wasapp/../imageserver/theme/js/jquery.min.js" type="text/javascript"></script>
-<script src="/wasapp/../imageserver/theme/js/modernizr-2.0.6.min.js"></script>
-<script src="/wasapp/../imageserver/theme/js/wasapp.js"></script>
-<script type="text/javascript" src="javascript/JsFunctions.js"></script>
-<script type="text/javascript" src="javascript/map.js"></script>
-<script type="text/javascript" src="javascript/comm_map.js"></script>
-
-<style type="text/css">
-        @media print {
-                .noPrint, #heading, #footer {
-                    display: none !important;
-                    height: 0;
-                }
-         }
-
-        @media only screen {
-                .noScreen,
-                .hidden-screen {
-                  display: none;
-                }
-        }
-
-        @media print {
-                .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6,.col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-xs-12 {
-                  float: left;
-                }
-                .col-sm-12, .col-xs-12 {
-                  width: 100%;
-                }
-                .col-sm-11 {
-                  width: 91.66666667%;
-                }
-                .col-sm-10 {
-                  width: 83.33333333%;
-                }
-                .col-sm-9 {
-                  width: 75%;
-                }
-                .col-sm-8 {
-                  width: 66.66666667%;
-                }
-                .col-sm-7 {
-                  width: 58.33333333%;
-                }
-                .col-sm-6 {
-                  width: 66.66666667%;
-                }
-                .col-sm-5 {
-                  width: 41.66666667%;
-                }
-                .col-sm-4 {
-                  width: 33.33333333%;
-                }
-                .col-sm-3 {
-                  width: 25%;
-                }
-                .col-sm-2 {
-                  width: 25%;
-                }
-                .col-sm-1 {
-                  width: 8.33333333%;
-                }
-                .col-sm-pull-12 {
-                  right: 100%;
-                }
-                .col-sm-pull-11 {
-                  right: 91.66666667%;
-                }
-                .col-sm-pull-10 {
-                  right: 83.33333333%;
-                }
-                .col-sm-pull-9 {
-                  right: 75%;
-                }
-                .col-sm-pull-8 {
-                  right: 66.66666667%;
-                }
-                .col-sm-pull-7 {
-                  right: 58.33333333%;
-                }
-                .col-sm-pull-6 {
-                  right: 50%;
-                }
-                .col-sm-pull-5 {
-                  right: 41.66666667%;
-                }
-                .col-sm-pull-4 {
-                  right: 33.33333333%;
-                }
-                .col-sm-pull-3 {
-                  right: 25%;
-                }
-                .col-sm-pull-2 {
-                  right: 16.66666667%;
-                }
-                .col-sm-pull-1 {
-                  right: 8.33333333%;
-                }
-                .col-sm-pull-0 {
-                  right: auto;
-                }
-                .col-sm-push-12 {
-                  left: 100%;
-                }
-                .col-sm-push-11 {
-                  left: 91.66666667%;
-                }
-                .col-sm-push-10 {
-                  left: 83.33333333%;
-                }
-                .col-sm-push-9 {
-                  left: 75%;
-                }
-                .col-sm-push-8 {
-                  left: 66.66666667%;
-                }
-                .col-sm-push-7 {
-                  left: 58.33333333%;
-                }
-                .col-sm-push-6 {
-                  left: 50%;
-                }
-                .col-sm-push-5 {
-                  left: 41.66666667%;
-                }
-                .col-sm-push-4 {
-                  left: 33.33333333%;
-                }
-                .col-sm-push-3 {
-                  left: 25%;
-                }
-                .col-sm-push-2 {
-                  left: 16.66666667%;
-                }
-                .col-sm-push-1 {
-                  left: 8.33333333%;
-                }
-                .col-sm-push-0 {
-                  left: auto;
-                }
-                .col-sm-offset-12 {
-                  margin-left: 100%;
-                }
-                .col-sm-offset-11 {
-                  margin-left: 91.66666667%;
-                }
-                .col-sm-offset-10 {
-                  margin-left: 83.33333333%;
-                }
-                .col-sm-offset-9 {
-                  margin-left: 75%;
-                }
-                .col-sm-offset-8 {
-                  margin-left: 66.66666667%;
-                }
-                .col-sm-offset-7 {
-                  margin-left: 58.33333333%;
-                }
-                .col-sm-offset-6 {
-                  margin-left: 50%;
-                }
-                .col-sm-offset-5 {
-                  margin-left: 41.66666667%;
-                }
-                .col-sm-offset-4 {
-                  margin-left: 33.33333333%;
-                }
-                .col-sm-offset-3 {
-                  margin-left: 25%;
-                }
-                .col-sm-offset-2 {
-                  margin-left: 16.66666667%;
-                }
-                .col-sm-offset-1 {
-                  margin-left: 8.33333333%;
-                }
-                .col-sm-offset-0 {
-                  margin-left: 0%;
-                }
-        }
-
-        @media print {
-                .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,.col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
-                  float: left;
-                }
-                .col-md-12 {
-                  width: 100%;
-                }
-                .col-md-11 {
-                  width: 91.66666667%;
-                }
-                .col-md-10 {
-                  width: 83.33333333%;
-                }
-                .col-md-9 {
-                  width: 75%;
-                }
-                .col-md-8 {
-                  width: 66.66666667%;
-                }
-                .col-md-7 {
-                  width: 58.33333333%;
-                }
-                .col-md-6 {
-                  width: 50%;
-                }
-                .col-md-5 {
-                  width: 41.66666667%;
-                }
-                .col-md-4 {
-                  width: 100%;
-                }
-                .col-md-3 {
-                  width:35%;
-                }
-                .col-md-2 {
-                  width: 16.66666667%;
-                }
-                .col-md-1 {
-                  width: 8.33333333%;
-                }
-                .col-md-pull-12 {
-                  right: 100%;
-                }
-                .col-md-pull-11 {
-                  right: 91.66666667%;
-                }
-                .col-md-pull-10 {
-                  right: 83.33333333%;
-                }
-                .col-md-pull-9 {
-                  right: 75%;
-                }
-                .col-md-pull-8 {
-                  right: 66.66666667%;
-                }
-                .col-md-pull-7 {
-                  right: 58.33333333%;
-                }
-                .col-md-pull-6 {
-                  right: 50%;
-                }
-                .col-md-pull-5 {
-                  right: 41.66666667%;
-                }
-                .col-md-pull-4 {
-                  right: 33.33333333%;
-                }
-                .col-md-pull-3 {
-                  right: 25%;
-                }
-                .col-md-pull-2 {
-                  right: 16.66666667%;
-                }
-                .col-md-pull-1 {
-                  right: 8.33333333%;
-                }
-                .col-md-pull-0 {
-                  right: auto;
-                }
-                .col-md-push-12 {
-                  left: 100%;
-                }
-                .col-md-push-11 {
-                  left: 91.66666667%;
-                }
-                .col-md-push-10 {
-                  left: 83.33333333%;
-                }
-                .col-md-push-9 {
-                  left: 75%;
-                }
-                .col-md-push-8 {
-                  left: 66.66666667%;
-                }
-                .col-md-push-7 {
-                  left: 58.33333333%;
-                }
-                .col-md-push-6 {
-                  left: 50%;
-                }
-                .col-md-push-5 {
-                  left: 41.66666667%;
-                }
-                .col-md-push-4 {
-                  left: 33.33333333%;
-                }
-                .col-md-push-3 {
-                  left: 25%;
-                }
-                .col-md-push-2 {
-                  left: 16.66666667%;
-                }
-                .col-md-push-1 {
-                  left: 8.33333333%;
-                }
-                .col-md-push-0 {
-                  left: auto;
-                }
-                .col-md-offset-12 {
-                  margin-left: 100%;
-                }
-                .col-md-offset-11 {
-                  margin-left: 91.66666667%;
-                }
-                .col-md-offset-10 {
-                  margin-left: 83.33333333%;
-                }
-                .col-md-offset-9 {
-                  margin-left: 75%;
-                }
-                .col-md-offset-8 {
-                  margin-left: 66.66666667%;
-                }
-                .col-md-offset-7 {
-                  margin-left: 58.33333333%;
-                }
-                .col-md-offset-6 {
-                  margin-left: 50%;
-                }
-                .col-md-offset-5 {
-                  margin-left: 41.66666667%;
-                }
-                .col-md-offset-4 {
-                  margin-left: 33.33333333%;
-                }
-                .col-md-offset-3 {
-                  margin-left: 25%;
-                }
-                .col-md-offset-2 {
-                  margin-left: 16.66666667%;
-                }
-                .col-md-offset-1 {
-                  margin-left: 8.33333333%;
-                }
-                .col-md-offset-0 {
-                  margin-left: 0%;
-                }
-        }
-
-        @media print {
-                  body, .body, form-control, .form-control {
-                        font-size: 12px;
-                    background-color: white;
-                  }
-    }
-
-        @media print {
-                h1, .h1, h2, .h2, h3, .h3 {
-                        color: black;
-                }
-        }
-
-        @media print {
-                h1, .h1 {
-                        font-size: 1.5em;
-                }
-        }
-
-        @media print {
-                input:disabled+label {
-                        color: silver;
-                }
-        }
-
-        @media print {
-                input[ ?checkbox ?]:disabled+label {
-                        color: silver;
-                }
-        }
-}
-</style>   
-
-<style type="text/css">
-input:disabled+label {
-        color: silver;
-}
-
-input[ ?checkbox ?]:disabled+label {
-        color: silver;
-}
-</style>
-
-
-
-<script type="text/javascript">
-        window.setTimeout("parent.location='/portal/dmv/timeout';",
-                        605000);
-</script>
-
-<!--   Google Analytics   -->
-<script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push([ '_setAccount', 'UA-3419582-2' ]); // ca.gov  google analytics profile code
-    _gaq.push([ '_setDomainName', '.ca.gov' ]);
-    _gaq.push([ '_trackPageview' ]);
-
-    (function() {
-        var ga = document.createElement('script');
-        ga.type = 'text/javascript';
-        ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl'
-                                        : 'http://www')
-                                        + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(ga, s);
-    })();
-</script>
-<script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push([ '_setAccount', 'UA-3419582-34' ]); // DMV's google analytics profile code
-    _gaq.push([ '_setDomainName', '.ca.gov' ]);
-    _gaq.push([ '_trackPageview' ]);
-
-    (function() {
-        var ga = document.createElement('script');
-        ga.type = 'text/javascript';
-        ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl'
-                                        : 'http://www')
-                                        + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(ga, s);
-    })();
-</script>
-
-<!--   Google Chrome Browser Autocomplete Disablement   -->
-<script>
-    $(document).ready(function () {
-        try {
-            $("input[type='text']").each(function(){
-                $(this).attr("autocomplete","none");
-               });
-        }
-        catch (e)
-        { }
-    });
-</script>
-
-</head>
-
-
-<body class="app javascript_on ">
-    
-
-    <div id="heading">
-
-        
-            
-            
-                <header id="header" class="global-header">
-
-    <div id="skip_to_content" style="visibility: visible"></div>
-
-    <!-- logo and organization banner -->
-    <div class="branding">
-        <div class="header-cagov-logo">
-            <img src="/wasapp/../imageserver/theme/images/header-ca.gov.png" alt="CA.gov" />
-        </div>
-    
-        <div class="header-organization-banner">
-            <img src="/wasapp/../imageserver/theme/images/header-organization.png" alt="California Department of Motor Vehicles">
-        </div>
-    </div>
-
-    <div class="mobile-controls">
-        <span class="mobile-control toggle-menu"><span class="ca-gov-icon-menu" aria-hidden="true"></span><span class="sr-only">Menu</span></span>
-    </div>
-    
-            
-        
-
-        
-            
-            
-                
-            
-        
-
-        
-            
-                
-                    <!-- UserInfo, logged out -->
-                    <div id="UserInfo">
-                        <p>
-                            <a href="/wasapp/../portal/mydmv?lang=en">
-                                Login
-                            </a>
-                            <a href="/wasapp/shoppingcart/shoppingCartApplication.do?localeName=en">
-                                Shopping Cart
-                                
-                            </a>
-                        </p>
-                    </div>
-                
-                
-            
-        
-        
-
-        <!-- main navigation -->
-        <nav id="navigation" class="main-navigation singlelevelnav auto-highlight mobile-closed">
-        <ul id="nav_list" class="top-level-nav">
-            <!-- DMV Home -->
-            <li id="home-link" class="nav-item">
-                <a href="/wasapp/../portal/dmv" class="first-level-link">
-                    Home
-                </a>
-            </li>
-        </ul>
-        </nav>
-
-        <div class="header-decoration"></div>
-        </header>
-
-    </div>
-    <!-- closes heading div -->
-
-    <a name="content"></a>
-
-    <div id="main-content" class="main-content">
-        <div id="app_header">
-            
-<h1>Appointment System</h1>
-        </div>
-        <div id="app_content">
-            
-
-
-
-
-
-
-
-<noscript>
-        <p class="alert alert-danger">
-                Javascript is off on your browser. This application requires Javascript to be enabled.
-        </p>
-</noscript>
-
-<script>
-        function submitForm_1() {
-                document.getElementById("formId_1").submit(); 
-        }
-</script>
-<p>
-        You have selected to do the following task(s) for
-        <strong>JASON WHITE</strong>:
-</p>
-<ul>
-
-
-                <li>
-                        Apply for, replace or renew a California driver license or identification card
-                </li>
-
-
-</ul>
-
-<p>
-        <strong>NOTE:</strong>
-        This appointment is NOT for a behind-the-wheel driving test. If you want to schedule a driving test, click
-        <a href="changeToDriveTest.do">
-                here.
-        </a>
-</p>
-
-<form id="formId_1" method="post" action="/wasapp/foa/checkForOfficeVisitConflicts.do">
-        <!-- Selected Office -->
-        <div class="panel panel-default">
-                <div class="panel-heading">
-                        <strong>You have selected the following office:</strong>
-                </div>
-
-                <div class="r-table col-xs-12">
-                        <table class="col-sm-12 table-bordered table-condensed">
-                                <thead>
-                                        <tr>
-                                                <th>Select</th>
-                                                <th>Office</th>
-                                                <th>Appointment</th>
-                                        </tr>
-                                </thead>
-                                <tbody>
-                                        <tr>
-                                                <td data-title="Select">
-                                                                <p class="radio full-label center-align">
-                                                                        <label>
-                                                                                <input type="radio" name="chosenOfficeId" value="0" checked="checked" id="office" />
-                                                                        </label>
-                                                                </p>
-                                                        </td>
-                                                <td data-title="Office">
-                                                                <p class="no-margin-bottom">
-                                                                        AUBURN
-                                                                        <br />
-                                                                        11722 Enterprise Drive
-                                                                        <br />
-                                                                        AUBURN, CA
-                                                                </p>
-                                                         </td>
-                                                <td data-title="Appointment">
-                                                         
-
-                                                        <p class="no-margin-bottom">
-                                                                The first available appointment for this office is on:
-
-
-                                                        </p> 
-
-                                                                        <p class="no-margin-bottom">
-                                                                                <strong> Thursday, May 9, 2019 at 9:20 AM
-                                                                                </strong>
-                                                                        </p>
-
-                                                        </td>
-                                        </tr>
-                                </tbody>
-                        </table>
-                </div>
-        </div>
-
-        <!-- Nearby Offices -->
-
-</form>
-
-<!-- Calendar -->
-<form id="ApptForm" method="post" action="/wasapp/foa/findOfficeVisit.do" class="form-horizontal">
-        <input type="hidden" id="showToday" value="true" />
-
-
-
-        <fieldset>
-                <p><em>Your selection must be for a time later than the first available appointment displayed above.</em></p>
-                <div class="col-xs-12 col-md-3">
-                        <label for="formattedRequestedDate">Date</label>
-                        <br>
-                        <input type="text" id="formattedRequestedDate" name="formattedRequestedDate" class="form-control" onchange="enableCheckAvail(this.name);">
-                </div>
-                <div class="col-xs-12 col-md-1">
-                        and/or
-                </div>
-                <div class="col-xs-12 col-md-2">
-                        <label for="requestedTime">Time</label>
-                        <br>
-                        <select name="requestedTime" id="requestedTime" class="form-control inline" onchange="enableCheckAvail(this.name);">
-                                <option value="" selected> </option>
-                                <option value ="0800">8:00 AM</option>
-                                <option value ="0830">8:30 AM</option>
-                                <option value ="0900">9:00 AM</option>
-                                <option value ="0930">9:30 AM</option>
-                                <option value ="1000">10:00 AM</option>
-                                <option value ="1030">10:30 AM</option>
-                                <option value ="1100">11:00 AM</option>
-                                <option value ="1130">11:30 AM</option>
-                                <option value ="1200">12:00 PM</option>
-                                <option value ="1230">12:30 PM</option>
-                                <option value ="1300">1:00 PM</option>
-                                <option value ="1330">1:30 PM</option>
-                                <option value ="1400">2:00 PM</option>
-                                <option value ="1430">2:30 PM</option>
-                                <option value ="1500">3:00 PM</option>
-                                <option value ="1530">3:30 PM</option>
-                                <option value ="1600">4:00 PM</option>
-                                <option value ="1630">4:30 PM</option>
-                        </select>
-                </div>
-                <div class="col-xs-12 col-md-6">
-                        <br><input type="submit" id="checkAvail" name="checkAvail" class="btn btn-default" value="Check for Availability" /><br><br>
-                </div>
-                <br>
-                <br>
-                <p>NOTE:</p>
-                <ul>
-                        <li>A search by <i><b>date and time</b></i> will look for an appointment for that date only and the closest time on or after your request.</li>
-                        <li>A search by <i><b>date only</b></i> will look for an appointment for that date only and the first available time on that date.</li>
-                        <li>A search by <i><b>time only</b></i> will look for an appointment for the first available date with an appointment time on or after your request.</li>
-                </ul>
-        </fieldset>
-        <script type="text/javascript">
-            var ng_config = {
-                assests_dir: 'calendar/'        // the path to the assets directory
-            };
-        </script>
-        <script type="text/javascript" src="javascript/ng_all.js"></script>
-        <script type="text/javascript" src="javascript/calendar.js"></script>
-        <script type="text/javascript">
-                var my_cal;
-                var start = new Date('March 19, 2019');
-                var today = document.getElementById("showToday");
-
-                if (today != null) {
-                        start.setDate(start.getDate() + 0);
-                } else {
-                        start.setDate(start.getDate() + 1);
-                }
-
-                var end = new Date('March 19, 2019');
-                end.setDate(end.getDate() + 90);
-                var holidays = [{date:1, month:3},{date:27, month:4}];
-
-                ng.ready(function(){
-                        document.getElementById("checkAvail").disabled = true;
-
-                // creating the calendar
-                // changed calendar to display 4 months for 90 days availability 12/2013
-                my_cal = new ng.Calendar({
-                    input: 'formattedRequestedDate',
-                    num_months: 1,
-                    num_col: 1,
-                    dates_off: holidays,
-                    weekend: [0,7],
-                    date_format: 'D, d M Y',
-                    server_date_format: 'D, d M Y',
-                        start_date: start,
-                        end_date: end,
-                        events: { 
-                                        onClose:function(dt){enableCheckAvail('formattedRequestedDate');}
-                                },
-                                offset:{x:0, y:0},
-                                calendar_img: ng_config.assests_dir+'components/calendar/images/cal.gif'
-                });
-                
-                // Format css for input field and icon
-                $(".ng_cal_input_field").addClass("form-control").css({
-                "border-top-right-radius": "0",
-                "border-bottom-right-radius": "0"
-            });
-                $(".ng-button-icon-span img").css({
-                        "padding": "8px 12px",
-                        "border-top-right-radius": "4px",
-                        "border-bottom-right-radius": "4px",
-                        "border-left": "0",
-                        "background-color": "#EEE",
-                        "border-color": "#CCC"
-                });
-            });
-        </script>
-</form>
-
-<div class="col-xs-12 form-group button-group xs-expand centered">
-
-
-                                <a href="javascript: submitForm_1()" class="btn btn-primary">
-                                        Continue
-                                </a>
-                                <a href="startOfficeVisit.do" class="btn btn-default">
-                                        Back
-                                </a>
-                                <a href="../../portal/dmv/detail/portal/foa/welcome" class="btn btn-default">
-                                        Cancel
-                                </a>
-            
-
-
-            
-            
-
-</div>
-
-<p class="foot_note">
-        <em><strong>Note:</strong> If you choose <strong>&quot;Back&quot;</strong> or <strong>&quot;Cancel&quot;</strong> this appointment will NOT be submitted and the information previously entered will not be retained.</em>
-</p>
-        </div>
-    </div>
-
-    <div class="cleaner"></div>
-
-    <div id="footer">
-        
-            
-            
-                <div class="footer-copyright global-footer">
-    <div class="container">
-        <div class="row">
-        
-            <div class="col-md-2">&nbsp;</div>
-            
-            <div class="col-md-4">
-
-                <div class="foot1">
-                    <a href="/wasapp/../portal/dmv/dmvfooter2/accessibility">Accessibility</a>
-                    <br>
-                    <a href="/wasapp/../portal/dmv/dmvfooter2/conditionsofuse">Conditions of Use</a>
-                    <br>
-                    <a href="/wasapp/../portal/dmv/dmvfooter1/disabilityservices">Disability Services</a>
-                    <br>
-                    <a href="/wasapp/../portal/dmv/dmvfooter1/footerhelp">Help</a>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="head2">
-                    <a href="/wasapp/../portal/dmv">Home</a>
-                    <br>
-                    <a href="/wasapp/../portal/dmv/dmvfooter2/privacypolicy">Privacy Policy</a>
-                    <br>
-                    <a href="/wasapp/../portal/dmv/dmvfooter1/sitemap">Site Map</a>
-                    <br>
-                    <a href="/wasapp/../portal/dmv/dmvfooter1/technicalsupport">Technical Support</a>
-                </div>
-            </div>
-            
-            <div class="col-md-2">&nbsp;</div>
-
-        </div>
-    </div>
-    <div class="row">
-        <div class="copyrt">
-            Copyright &copy; 
-            <span id="copyright"> <script type="text/javascript">document.getElementById('copyright').appendChild(document.createTextNode(new Date().getFullYear()))
-                        </script>
-            </span> State of California
-        </div>
-    </div>
-</div>
-            
-        
-        <div
-            style="padding: 0px; overflow: hidden; visibility: hidden; position: absolute; width: 1279px; left: -1280px; top: 0px; z-index: 1010;"
-            id="WzTtDiV"></div>
-    </div>
-
-    <script src="/wasapp/../imageserver/theme/js/cagov.core.js"></script>
-
-</body>
-</html>`
