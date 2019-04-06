@@ -171,9 +171,10 @@ func querydmvs(dmvs []DMVinfo, us jsondata, dc jsondata) {
 	for _, dmv := range dmvs {
 		minPause := 5
 		n := rand.Intn(10)
-		fmt.Printf("working ... Query DMV %s (%d) in %d seconds, errorcount left %d , try to get appointment in %f days...", dmv.Name, dmv.ID, n+minPause, queryErrorCountAllowed, notifyForApptInDays)
+		fmt.Printf("working ... Query DMV %s (%d) %s in %d seconds, errorcount left %d , try to get appointment in %f days...", dmv.Name, dmv.ID, us["mode_OfficeVisit_or_DriveTest"].(string), n+minPause, queryErrorCountAllowed, notifyForApptInDays)
 		time.Sleep(time.Duration(n+minPause) * time.Second)
-		res, err := requestDMV(dmv, us["mode"].(string), int(us["numberItems"].(float64)), us["taskCID"].(string), us["firstName"].(string), us["lastName"].(string), us["telArea"].(string), us["telPrefix"].(string), us["telSuffix"].(string), dc["URLPost"].(string), dc["CaptchaResponse"].(string), dc["GRecaptchaResponse"].(string))
+
+		res, err := requestDMV(dmv, us["mode_OfficeVisit_or_DriveTest"].(string), dc["URLPostOfficeVisit"].(string), dc["URLPostDriveTest"].(string), us["dlNumber"].(string), us["firstName"].(string), us["lastName"].(string), us["birthMonth"].(string), us["birthDay"].(string), us["birthYear"].(string), us["telArea"].(string), us["telPrefix"].(string), us["telSuffix"].(string), dc["CaptchaResponse"].(string), dc["GRecaptchaResponse"].(string))
 
 		if err != nil {
 			fmt.Println("error:", err)
@@ -210,13 +211,21 @@ func querydmvs(dmvs []DMVinfo, us jsondata, dc jsondata) {
 
 }
 
-func requestDMV(dmvs DMVinfo, mode string, numberItems int, taskCID string, firstName string, lastName string, telArea string, telPrefix string, telSuffix string, url string, captchaResponse string, gRecaptchaResponse string) (string, error) {
+func requestDMV(dmvs DMVinfo, mode string, urlov string, urldt string, dlNumber string, firstName string, lastName string, birthMonth string, birthDay string, birthYear string, telArea string, telPrefix string, telSuffix string, captchaResponse string, gRecaptchaResponse string) (string, error) {
 
 	referer := "https://www.dmv.ca.gov/wasapp/foa/findOfficeVisit.do"
 	origin := "https://www.dmv.ca.gov"
 
-	querydata := fmt.Sprintf("mode=%s&captchaResponse=%s&officeId=%d&numberItems=%d&taskCID=%s&firstName=%s&lastName=%s&telArea=%s&telPrefix=%s&telSuffix=%s&resetCheckFields=true&g-recaptcha-response=%s", mode, captchaResponse, dmvs.ID, numberItems, taskCID, firstName, lastName, telArea, telPrefix, telSuffix, gRecaptchaResponse)
+	url := urlov
+	querydata := fmt.Sprintf("mode=OfficeVisit&captchaResponse=%s&officeId=%d&numberItems=1&taskCID=true&firstName=%s&lastName=%s&telArea=%s&telPrefix=%s&telSuffix=%s&resetCheckFields=true&g-recaptcha-response=%s", captchaResponse, dmvs.ID, firstName, lastName, telArea, telPrefix, telSuffix, gRecaptchaResponse)
+	if mode == "DriveTest" {
+		url = urldt
+		querydata = fmt.Sprintf("mode=DriveTest&captchaResponse=%s&officeId=%d&numberItems=1&requestedTask=DT&firstName=%s&lastName=%s&dlNumber=%s&birthMonth=%s&birthDay=%s&birthYear=%s&telArea=%s&telPrefix=%s&telSuffix=%s&resetCheckFields=true&g-recaptcha-response=%s", captchaResponse, dmvs.ID, firstName, lastName, dlNumber, birthMonth, birthDay, birthYear, telArea, telPrefix, telSuffix, gRecaptchaResponse)
+	}
+	// fmt.Println(querydata)
+
 	body := strings.NewReader(querydata)
+	// req, err := http.NewRequest("POST", url, body)
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		fmt.Println("error:", err)

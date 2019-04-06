@@ -1,5 +1,6 @@
 {
-    "URLPost": "https://www.dmv.ca.gov/wasapp/foa/findOfficeVisit.do",
+    "URLPostOfficeVisit": "https://www.dmv.ca.gov/wasapp/foa/findOfficeVisit.do",
+    "URLPostDriveTest": "https://www.dmv.ca.gov/wasapp/foa/findDriveTest.do",
     "CaptchaResponse": "03AOLTBLR3efGSZ3wQ_Wtxsvu4TOyUpWNAtEzJ8BUWj450rgbx_M-277VsZKQWkQqZWH4lHTj_lGOckdsOTlZfwby63B_yPKUilY3IyC3zWDCZkUNYa8GvNiWAwlkTDrupNtDbN-aC88HmINrozTaKx1U-_rsB6A1B7ozohB_KeVJVod5YRbA8ElwRM79zINXoxgVKAYbumnez_IbbV1aXG5fm95uWwWz9JuP3LxfLmrobBC9K2A6GkcRywnhUZkZO5IGob_1D4CjtmLx37XBrt3JBH9ht5-oKLDR5crPXH2eahSwsO28WHodwF1z_qBs6kD4jRlgrpD0g",
     "GRecaptchaResponse": "03AOLTBLR3efGSZ3wQ_Wtxsvu4TOyUpWNAtEzJ8BUWj450rgbx_M-277VsZKQWkQqZWH4lHTj_lGOckdsOTlZfwby63B_yPKUilY3IyC3zWDCZkUNYa8GvNiWAwlkTDrupNtDbN-aC88HmINrozTaKx1U-_rsB6A1B7ozohB_KeVJVod5YRbA8ElwRM79zINXoxgVKAYbumnez_IbbV1aXG5fm95uWwWz9JuP3LxfLmrobBC9K2A6GkcRywnhUZkZO5IGob_1D4CjtmLx37XBrt3JBH9ht5-oKLDR5crPXH2eahSwsO28WHodwF1z_qBs6kD4jRlgrpD0g"
 }

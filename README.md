@@ -1,4 +1,9 @@
 # dmv-ca-poller
-check the earliest appointment from CA DMV
+This program will try to scan nearest CA DMV for the earliest OfficeVist/DriveTest appointment time
+If avaailble time slot is within the days you defined in "notifyForApptInDays", you will get email notification immediately.
+Then quickly jump onto DMV website to make you appointment. 
 
-update usersettings_template.json and change the name to usersettings.json before use
+Usage:
+
+copy usersettings_template.json to usersettings.json, then update the json file with your information. then run the programme
+
