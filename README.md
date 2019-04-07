@@ -1,5 +1,5 @@
 # dmv-ca-poller
-This program will try to scan nearest CA DMV for the earliest OfficeVist/DriveTest appointment time
+This program will try to scan the nearest CA DMV in your area for the earliest OfficeVist/DriveTest appointment time
 If avaailble time slot is within the days you defined in "notifyForApptInDays", you will get email notification immediately.
 Then quickly jump onto DMV website to make you appointment. 
 
