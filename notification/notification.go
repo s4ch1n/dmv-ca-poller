@@ -5,12 +5,11 @@ import (
 	"log"
 	"net/smtp"
 	"strconv"
-
-	"github.com/GeorgeZhai/dmv-ca-poller/outlooksmtpauth"
+	// "github.com/GeorgeZhai/dmv-ca-poller/outlooksmtpauth"
 )
 
-// EmailConfig contains email configuration data for SendEmail
-type EmailConfig struct {
+// EmailClient contains email configuration data for SendEmail
+type EmailClient struct {
 	SenderEmail   string
 	SenderPW      string
 	ReceiverEmail string
@@ -18,10 +17,21 @@ type EmailConfig struct {
 	ServerPort    int
 }
 
+// NewEmailClient create a new EmailClient
+func NewEmailClient(SenderEmail string, SenderPW string, ReceiverEmail string, ServerHost string, ServerPort int) *EmailClient {
+	return &EmailClient{
+		SenderEmail:   SenderEmail,
+		SenderPW:      SenderPW,
+		ReceiverEmail: ReceiverEmail,
+		ServerHost:    ServerHost,
+		ServerPort:    ServerPort,
+	}
+}
+
 // SendEmail use EmailConfig to send string content
-func SendEmail(c EmailConfig, s string) {
+func (c *EmailClient) SendEmail(s string) {
 	log.Printf("sending email content: %s to %s", s, c.ReceiverEmail)
-	auth := outlooksmtpauth.OutlookSmtpAuth(c.SenderEmail, c.SenderPW)
+	auth := OutlookSmtpAuth(c.SenderEmail, c.SenderPW)
 
 	to := []string{c.ReceiverEmail}
 	msgs := fmt.Sprintf("To: %s\r\n"+

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"math/rand"
@@ -25,45 +26,34 @@ func main() {
 	dc := fileloader.JSONData{}
 	fileloader.LoadJSONFile(&dc, "defaultconf.json")
 
+	searchDistance := flag.Int("distance", int(us["distance"].(float64)), "DMV distance to your honme")
+	notifyForApptInDays := flag.Int("days", int(us["notifyForApptInDays"].(float64)), "How many days in the future?")
+	pauseDMV := flag.Int("pauseDMVSec", 5, "minimum seconds to pause between requests")
+	pauseRound := flag.Int("pauseRoundMin", 20, "gap between rounds in minutes")
+
+	var queryErrorCountAllowed int
+	flag.IntVar(&queryErrorCountAllowed, "errorAllowed", 20, "Number of query errors allow in the run")
+
+	flag.Parse()
+
 	rand.Seed(time.Now().UnixNano())
-	notifyForApptInDays := us["notifyForApptInDays"].(float64)
-	queryErrorCountAllowed := int(20)
+
 	c := 0
 
-	emailconf := notification.EmailConfig{
-		SenderEmail:   us["senderEmail"].(string),
-		SenderPW:      us["senderPW"].(string),
-		ReceiverEmail: us["receiverEmail"].(string),
-		ServerHost:    us["smtpServerHost"].(string),
-		ServerPort:    int(us["smtpServerPort"].(float64)),
-	}
-	reqConf := dmv.ReqConfig{
-		Mode:               us["mode_OfficeVisit_or_DriveTest"].(string),
-		DlNumber:           us["dlNumber"].(string),
-		FirstName:          us["firstName"].(string),
-		LastName:           us["lastName"].(string),
-		BirthMonth:         us["birthMonth"].(string),
-		BirthDay:           us["birthDay"].(string),
-		BirthYear:          us["birthYear"].(string),
-		TelArea:            us["telArea"].(string),
-		TelPrefix:          us["telPrefix"].(string),
-		TelSuffix:          us["telSuffix"].(string),
-		CaptchaResponse:    dc["CaptchaResponse"].(string),
-		GRecaptchaResponse: dc["GRecaptchaResponse"].(string),
-	}
+	email := notification.NewEmailClient(us["senderEmail"].(string), us["senderPW"].(string), us["receiverEmail"].(string), us["smtpServerHost"].(string), int(us["smtpServerPort"].(float64)))
+	reqClient := dmv.NewReqClient(us["mode_OfficeVisit_or_DriveTest"].(string), us["dlNumber"].(string), us["firstName"].(string), us["lastName"].(string), us["birthMonth"].(string), us["birthDay"].(string), us["birthYear"].(string), us["telArea"].(string), us["telPrefix"].(string), us["telSuffix"].(string), dc["CaptchaResponse"].(string), dc["GRecaptchaResponse"].(string))
 
-	dmvstoquery := dmv.GetQueryDMVs(homeloc, us["distance"].(float64))
+	dmvstoquery := dmv.GetQueryDMVs(homeloc, float64(*searchDistance))
 
 	for {
 		c++
 		log.Printf("Starting scan round %d", c)
 
 		for _, d := range dmvstoquery {
-			minPause := 5
 			n := rand.Intn(10)
-			log.Printf("working ... Query DMV %s (%d) %s in %d seconds, errorcount left %d , try to get appointment in %f days...", d.Name, d.ID, us["mode_OfficeVisit_or_DriveTest"].(string), n+minPause, queryErrorCountAllowed, notifyForApptInDays)
-			time.Sleep(time.Duration(n+minPause) * time.Second)
-			res, err := dmv.RequestDMV(d, reqConf)
+			log.Printf("working ... Query DMV %s (%d) %s in %d seconds, errorcount left %d , try to get appointment in %d days...", d.Name, d.ID, us["mode_OfficeVisit_or_DriveTest"].(string), n+(*pauseDMV), queryErrorCountAllowed, *notifyForApptInDays)
+			time.Sleep(time.Duration(n+(*pauseDMV)) * time.Second)
+			res, err := reqClient.RequestDMV(d)
 
 			if err != nil {
 				log.Println("error:", err)
@@ -89,14 +79,15 @@ func main() {
 			deltaDays := delta.Hours() / 24
 			log.Printf(" in  %f days \n", deltaDays)
 
-			if deltaDays <= notifyForApptInDays {
+			if deltaDays <= float64(*notifyForApptInDays) {
 				emailcontent := fmt.Sprintf("Found DMV %s, ID: %d, Date: %s, in the next %f days", d.Name, d.ID, t.Format("2006-01-02 15:04 PM MST"), deltaDays)
-				notification.SendEmail(emailconf, emailcontent)
+				// notification.SendEmail(emailconf, emailcontent)
+				email.SendEmail(emailcontent)
 			}
 
 		}
 		log.Printf("Completed scan round %d", c)
-		time.Sleep(time.Duration(20) * time.Minute)
+		time.Sleep(time.Duration(*pauseRound) * time.Minute)
 	}
 
 }
