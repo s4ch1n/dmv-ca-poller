@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/smtp"
-	"strconv"
 	// "github.com/GeorgeZhai/dmv-ca-poller/outlooksmtpauth"
 )
 
@@ -29,7 +28,7 @@ func NewEmailClient(SenderEmail string, SenderPW string, ReceiverEmail string, S
 }
 
 // SendEmail use EmailConfig to send string content
-func (c *EmailClient) SendEmail(s string) {
+func (c *EmailClient) SendEmail(s string) error {
 	log.Printf("sending email content: %s to %s", s, c.ReceiverEmail)
 	auth := OutlookSmtpAuth(c.SenderEmail, c.SenderPW)
 
@@ -39,9 +38,5 @@ func (c *EmailClient) SendEmail(s string) {
 		"\r\n"+
 		" %s \r\n", c.ReceiverEmail, s)
 	msg := []byte(msgs)
-	err := smtp.SendMail(c.ServerHost+":"+strconv.Itoa(c.ServerPort), auth, c.SenderEmail, to, msg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	return smtp.SendMail(fmt.Sprintf("%s:%d", c.ServerHost, c.ServerPort), auth, c.SenderEmail, to, msg)
 }

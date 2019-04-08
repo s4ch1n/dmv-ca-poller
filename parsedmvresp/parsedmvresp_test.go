@@ -869,7 +869,7 @@ func TestGetAppointmentTime(t *testing.T) {
 
 	for _, tc := range tcs {
 		et, _ := time.Parse("Monday, January 2, 2006 at 15:04 PM -0700", tc.t+" -0700")
-		rt, e := GetAppointmentTime(tc.s)
+		rt, e := GetAppointmentTime(tc.s, time.Now())
 		if rt != et || e != nil {
 			t.Errorf("GetAppointmentTime result was incorrect, got: %v, expecting: %v.", rt, et)
 		}

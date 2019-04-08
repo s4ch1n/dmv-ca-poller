@@ -11,7 +11,7 @@ func TestDMVSearch(t *testing.T) {
 		Lng: -122.0887737,
 	}
 
-	r := GetQueryDMVs(l, 30)
+	r, _ := GetQueryDMVs(l, 30)
 
 	if len(r) != 11 {
 		t.Errorf(" Returned DMV numbers wrong, got: %v, expecting: %v.", len(r), 11)

@@ -16,6 +16,4 @@ usersettings.json
 
 ferret.log
 
-ferretway/chromedata/*
-!ferretway/chromedata/.keep
-
+debugReponse.html

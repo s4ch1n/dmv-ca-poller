@@ -33,9 +33,7 @@ func distance(lat1 float64, lng1 float64, lat2 float64, lng2 float64, unit ...st
 		dist = 1
 	}
 
-	dist = math.Acos(dist)
-	dist = dist * 180 / PI
-	dist = dist * 60 * 1.1515
+	dist = (math.Acos(dist) * 180 / PI) * 60 * 1.1515
 
 	if len(unit) > 0 {
 		if unit[0] == "K" {
@@ -48,8 +46,8 @@ func distance(lat1 float64, lng1 float64, lat2 float64, lng2 float64, unit ...st
 	return dist
 }
 
-// FindDMVsByDistance filter a list a DNVinfo with home location and distance range. it returns a new slice of DMVinfo
-func FindDMVsByDistance(dmvs []DMVinfo, l Loc, d float64) []DMVinfo {
+// findDMVsByDistance filter a list a DNVinfo with home location and distance range. it returns a new slice of DMVinfo
+func findDMVsByDistance(dmvs []DMVinfo, l Loc, d float64) []DMVinfo {
 	r := []DMVinfo{}
 	for _, dmv := range dmvs {
 		dist := distance(dmv.Lat, dmv.Lng, l.Lat, l.Lng)
@@ -60,23 +58,32 @@ func FindDMVsByDistance(dmvs []DMVinfo, l Loc, d float64) []DMVinfo {
 	return r
 }
 
-// FindAllDMVs give all the DMVs in CA
-func FindAllDMVs() []DMVinfo {
+// findAllDMVs give all the DMVs in CA
+func findAllDMVs() ([]DMVinfo, error) {
 	r := []DMVinfo{}
 	dmvs := fileloader.JSONData{}
-	fileloader.LoadJSONFile(&dmvs, "./dmvinfo.json")
-
+	if err := fileloader.LoadJSONFile(&dmvs, "./dmvinfo.json"); err != nil {
+		return r, err
+	}
 	for k, v := range dmvs {
 		dmv := DMVinfo{}
-		mapstructure.Decode(v, &dmv)
+
+		if err := mapstructure.Decode(v, &dmv); err != nil {
+			return r, err
+		}
 		(&dmv).Name = k
 		r = append(r, dmv)
 	}
 
-	return r
+	return r, nil
 }
 
 // GetQueryDMVs return a slice of DMVs for query
-func GetQueryDMVs(l Loc, d float64) []DMVinfo {
-	return FindDMVsByDistance(FindAllDMVs(), l, d)
+func GetQueryDMVs(location Loc, distance float64) ([]DMVinfo, error) {
+	if allDMVs, err := findAllDMVs(); err != nil {
+		return allDMVs, err
+	} else {
+		return findDMVsByDistance(allDMVs, location, distance), nil
+	}
+
 }

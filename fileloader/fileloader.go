@@ -10,15 +10,16 @@ import (
 type JSONData map[string]interface{}
 
 // LoadJSONFile will load Jsondata from the filename
-func LoadJSONFile(d *JSONData, f string) {
+func LoadJSONFile(d *JSONData, f string) error {
 	bs, err := ioutil.ReadFile(f)
 	if err != nil {
-		log.Println("error:", err)
+		return err
 	}
 	err = json.Unmarshal(bs, &d)
 	if err != nil {
-		log.Println("error:", err)
+		return err
 	}
+	return nil
 }
 
 // LoadFile will load text file and return a string
